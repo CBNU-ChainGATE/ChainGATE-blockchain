@@ -308,6 +308,31 @@ def reply_request():
         return True
     return False
 
+
+@app.route('/transaction/new', methods=['POST'])
+def new_transaction():
+    """Issue transactions and run the consensus protocol for block creation."""
+    global pbft_protocol_condition, request_data, state, primary, node_id, consensus_nums, log, consensus_done
+
+    while pbft_protocol_condition:
+        print("Waiting trasaction/new!!!!")
+
+    # 변수 초기화
+    reset_consensus_state()
+    request_data = None
+
+    data = request.get_json()
+    state = 'REQUEST'
+    request_data = data  # 원본 클라이언트 요청 메시지 저장
+    client_request = {
+        'type': 'REQUEST',
+        'data': data
+    }
+    print(client_request)  # Debugging
+    pbft_protocol_condition = True  # PBFT 프로토콜이 수행 중임을 알림
+    send(node_id, client_request)
+    return jsonify({'message': 'Send Request to node...'}), 201
+
 ########################################################################
 ### PBFT Protocol (End)                                              ###
 ########################################################################
@@ -370,31 +395,6 @@ def full_chain():
     """Get data count from blockchain."""
     result = blockchain.get_block_total()
     return jsonify(result), 200
-
-
-@app.route('/transaction/new', methods=['POST'])
-def new_transaction():
-    """Issue transaction and execute consensus protocol for block creation."""
-    global pbft_protocol_condition, request_data, state, primary, node_id, consensus_nums, log, consensus_done
-
-    while pbft_protocol_condition:
-        print("Waiting trasaction/new!!!!")
-
-    # 변수 초기화
-    reset_consensus_state()
-    request_data = None
-
-    data = request.get_json()
-    state = 'REQUEST'
-    request_data = data  # 원본 클라이언트 요청 메시지 저장
-    client_request = {
-        'type': 'REQUEST',
-        'data': data
-    }
-    print(client_request)  # Debugging
-    pbft_protocol_condition = True  # PBFT 프로토콜이 수행 중임을 알림
-    send(node_id, client_request)
-    return jsonify({'message': 'Send Request to node...'}), 201
 
 
 if __name__ == "__main__":
