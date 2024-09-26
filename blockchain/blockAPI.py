@@ -6,8 +6,10 @@ import time
 from blockchain import Blockchain
 from cert import Cert
 from config import PORT
+from prometheus_flask_exporter import PrometheusMetrics
 
 app = Flask(__name__)
+metrics = PrometheusMetrics(app)
 
 # 로컬 IP 가져오기
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
