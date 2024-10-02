@@ -9,7 +9,7 @@ from config import PORT
 import logging
 
 app = Flask(__name__)
-logging.basicConfig(filename="logs/node.log", filenode='w', level=logging.INFO,
+logging.basicConfig(filename="logs/node.log", filemode='w', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 # 로컬 IP 가져오기
