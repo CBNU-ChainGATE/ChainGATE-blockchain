@@ -1,2 +1,3 @@
 blockchain/config.py
 blockchain/register.py
+blockchain/logs/
