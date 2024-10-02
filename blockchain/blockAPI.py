@@ -9,8 +9,8 @@ from config import PORT
 import logging
 
 app = Flask(__name__)
-logging.basicConfig(filename="logs/node.log", filemode='w', level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+# logging.basicConfig(filename="logs/node.log", filemode='w', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename="logs/node.log", filemode='w', level=logging.INFO)
 
 # 로컬 IP 가져오기
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
