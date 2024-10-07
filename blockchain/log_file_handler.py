@@ -4,13 +4,14 @@ import requests
 from config import LOGFILE, LOG_UPLOAD_URL
 import os  # os 모듈을 추가합니다.
 
+
 class LogFileHandler(FileSystemEventHandler):
     def on_modified(self, event):
-        if event.src_path == config.LOGFILE:
-            if not os.path.exists(config.LOGFILE):
-                open(config.LOGFILE, 'w').close()
+        if event.src_path == LOGFILE:
+            if not os.path.exists(LOGFILE):
+                open(LOGFILE, 'w').close()
 
-            with open(config.LOGFILE, 'rb') as f:
+            with open(LOGFILE, 'rb') as f:
                 files = {'file': f}
                 response = requests.post(LOG_UPLOAD_URL, files=files)
                 if response.status_code == 200:
