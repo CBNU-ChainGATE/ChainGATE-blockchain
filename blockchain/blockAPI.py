@@ -432,16 +432,15 @@ def full_chain():
 
 if __name__ == "__main__":
     logging.info(f"Starting server on port {PORT}")
+
     # 로그 파일 변경 감지
     event_handler = LogFileHandler()
     observer = Observer()
     observer.schedule(event_handler, path='logs/', recursive=False)
-    observer.start()
+    observer.start()  # Observer를 시작합니다.
 
     try:
-        while True:
-            time.sleep(1)
+        app.run(host='0.0.0.0', port=PORT)  # Flask 서버를 시작합니다.
     except KeyboardInterrupt:
-        observer.stop()
+        observer.stop()  # 키보드 인터럽트 시 Observer를 정지합니다.
     observer.join()
-    app.run(host='0.0.0.0', port=PORT)
