@@ -5,12 +5,15 @@ import socket
 import time
 from blockchain import Blockchain
 from cert import Cert
-from config import PORT
+from config import PORT, LOGFILE
 import logging
+from watchdog.observers import Observer
+from log_file_handler import LogFileHandler  # 새로 생성한 모듈 임포트
+
 
 app = Flask(__name__)
-# logging.basicConfig(filename="logs/node.log", filemode='w', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logging.basicConfig(filename="logs/node.log", filemode='w', level=logging.INFO)
+# logging.basicConfig(filename=LOGFILE, filemode='w', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename=LOGFILE, filemode='w', level=logging.INFO)
 
 # 로컬 IP 가져오기
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -50,6 +53,19 @@ blockchain.add_node(node_id)  # 본인 IP를 노드에 추가
 # Writer: Kim Dong Gyu
 # Version: 1.0.0
 # ==========================================================================================
+
+
+class LogFileHandler(FileSystemEventHandler):
+    def on_modified(self, event):
+        if event.src_path == config.LOGFILE:  # 변경된 파일이 로그 파일일 때
+            with open(config.LOGFILE, 'rb') as f:
+                files = {'file': f}
+                response = requests.post(
+                    'http://192.168.0.68/upload', files=files)
+                if response.status_code == 200:
+                    print("로그 파일이 성공적으로 전송되었습니다.")
+                else:
+                    print("로그 파일 전송 실패:", response.text)
 
 
 def reset_consensus_state():
@@ -429,4 +445,16 @@ def full_chain():
 
 if __name__ == "__main__":
     logging.info(f"Starting server on port {PORT}")
+    # 로그 파일 변경 감지
+    event_handler = LogFileHandler()
+    observer = Observer()
+    observer.schedule(event_handler, path='logs/', recursive=False)
+    observer.start()
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()
     app.run(host='0.0.0.0', port=PORT)
