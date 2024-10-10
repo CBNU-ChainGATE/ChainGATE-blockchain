@@ -136,7 +136,7 @@ def wait_for_messages(caller):
 def validate_preprepare(preprepare_message):
     """pre-prepare 메세지가 정상적인 메세지인지 검증."""
     global request_data, view
-    time.sleep(1.5)  # /transaction/new 요청을 받는데까지의 delay를 기다리기 위함
+    time.sleep(0.5)  # /transaction/new 요청을 받는데까지의 delay를 기다리기 위함
 
     # validate_preprepare를 수행하려면 request_data가 필요
     # 따라서 request_data가 설정될 때까지 기다림
