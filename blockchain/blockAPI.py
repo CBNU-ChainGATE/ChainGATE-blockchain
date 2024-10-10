@@ -5,7 +5,7 @@ import socket
 import time
 from blockchain import Blockchain
 from cert import Cert
-from config import PORT, LOGFILE
+from config import PORT, LOGFILE, LOG_UPLOAD_URL
 import logging
 from log_file_handler import setup_logging  # 로그 핸들러 모듈 임포트
 
