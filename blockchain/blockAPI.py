@@ -141,6 +141,7 @@ def validate_preprepare(preprepare_message):
     # validate_preprepare를 수행하려면 request_data가 필요
     # 따라서 request_data가 설정될 때까지 기다림
     while not request_data:
+        # 이 부분에서 계속 오류가 나면 위에 time.sleep(1.5) 시간 값 조정해주기.(logging 시에 post량이 많아서 나는 오류라서..)
         print("Waiting client_request (/transaction/new) ...")
 
     D_m = {"date": request_data["date"], "time": request_data["time"]}
