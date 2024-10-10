@@ -31,16 +31,18 @@ class Blockchain:
         """Create the block"""
         if self.pending_transactions:
             block = {
-                'timestamp': time.time(),
                 'previous_hash': previous_hash,
+                'timestamp': time.time(),
                 "date": self.pending_transactions.get('date'),
-                "department": self.pending_transactions.get('department'),
+                "time": self.pending_transactions.get('time'),
+                "employee_id": self.pending_transaction.get('employee_id'),
                 "name": self.pending_transactions.get('name'),
                 "position": self.pending_transactions.get('position'),
-                "time": self.pending_transactions.get('time')
+                "department": self.pending_transactions.get('department')
             }
             self.pending_transactions = {}
-            db_manager.insert_entrance_log(block['previous_hash'], block['timestamp'], block['date'], block['time'], block['employee_id'], block['name'], block['position'], block['department'])
+            db_manager.insert_entrance_log(block['previous_hash'], block['timestamp'], block['date'],
+                                           block['time'], block['employee_id'], block['name'], block['position'], block['department'])
 
             self.last_block = block
             return True
