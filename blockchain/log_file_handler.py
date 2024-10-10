@@ -20,8 +20,43 @@
 #                     print("로그 파일 전송 실패:", response.text)
 
 
+# import logging
+# import requests
+
+# class LogServerHandler(logging.Handler):
+#     def __init__(self, server_url, log_file_name):
+#         super().__init__()
+#         self.server_url = server_url
+#         self.log_file_name = log_file_name
+
+#     def emit(self, record):
+#         log_entry = self.format(record)
+#         try:
+#             # 로그 메시지와 로그 파일 이름을 함께 전송
+#             response = requests.post(self.server_url, json={
+#                 'log': log_entry,
+#                 'file_name': self.log_file_name
+#             })
+#             if response.status_code != 200:
+#                 print(f"Failed to send log entry. Status code: {response.status_code}")
+#         except Exception as e:
+#             print(f"Error while sending log entry: {e}")
+
+# def setup_logging(log_file_path, server_url):
+#     logging.basicConfig(filename=log_file_path, filemode='w', level=logging.INFO)
+#     logger = logging.getLogger()
+
+#     # 로그 서버로 로그를 보내는 핸들러 추가 (파일 이름 포함)
+#     log_server_handler = LogServerHandler(server_url, log_file_path.split('/')[-1])
+#     log_server_handler.setLevel(logging.INFO)
+#     logger.addHandler(log_server_handler)
+
+#     return logger
+
+
 import logging
-import requests
+import aiohttp
+import asyncio
 
 class LogServerHandler(logging.Handler):
     def __init__(self, server_url, log_file_name):
@@ -29,24 +64,26 @@ class LogServerHandler(logging.Handler):
         self.server_url = server_url
         self.log_file_name = log_file_name
 
+    async def send_log(self, log_entry):
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.post(self.server_url, json={
+                    'log': log_entry,
+                    'file_name': self.log_file_name
+                }) as response:
+                    if response.status != 200:
+                        print(f"Failed to send log entry. Status code: {response.status}")
+            except Exception as e:
+                print(f"Error while sending log entry: {e}")
+
     def emit(self, record):
         log_entry = self.format(record)
-        try:
-            # 로그 메시지와 로그 파일 이름을 함께 전송
-            response = requests.post(self.server_url, json={
-                'log': log_entry,
-                'file_name': self.log_file_name
-            })
-            if response.status_code != 200:
-                print(f"Failed to send log entry. Status code: {response.status_code}")
-        except Exception as e:
-            print(f"Error while sending log entry: {e}")
+        asyncio.create_task(self.send_log(log_entry))  # 비동기적으로 로그 전송
 
 def setup_logging(log_file_path, server_url):
     logging.basicConfig(filename=log_file_path, filemode='w', level=logging.INFO)
     logger = logging.getLogger()
 
-    # 로그 서버로 로그를 보내는 핸들러 추가 (파일 이름 포함)
     log_server_handler = LogServerHandler(server_url, log_file_path.split('/')[-1])
     log_server_handler.setLevel(logging.INFO)
     logger.addHandler(log_server_handler)
