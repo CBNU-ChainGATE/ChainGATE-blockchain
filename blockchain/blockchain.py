@@ -35,7 +35,7 @@ class Blockchain:
                 'timestamp': time.time(),
                 "date": self.pending_transactions.get('date'),
                 "time": self.pending_transactions.get('time'),
-                "employee_id": self.pending_transaction.get('employee_id'),
+                "employee_id": self.pending_transactions.get('employee_id'),
                 "name": self.pending_transactions.get('name'),
                 "position": self.pending_transactions.get('position'),
                 "department": self.pending_transactions.get('department')
