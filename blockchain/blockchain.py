@@ -62,9 +62,9 @@ class Blockchain:
         """Get total block count"""
         return db_manager.get_total_count()
 
-    def search_block(self, date, name, department):
+    def search_block(self, date, employee_id, name, department):
         """Find blocks matching search data"""
-        results = db_manager.search_data(date, name, department)
+        results = db_manager.search_data(date, employee_id, name, department)
         if not results:
             return False
         for result in results:
