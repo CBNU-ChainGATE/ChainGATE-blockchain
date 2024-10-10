@@ -65,6 +65,7 @@ class LogServerHandler(logging.Handler):
         self.log_file_name = log_file_name
 
     async def send_log(self, log_entry):
+        # 비동기 HTTP 요청을 통해 로그를 서버에 전송
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.post(self.server_url, json={
@@ -77,13 +78,16 @@ class LogServerHandler(logging.Handler):
                 print(f"Error while sending log entry: {e}")
 
     def emit(self, record):
+        # 로그 레코드를 포맷하고 비동기 작업으로 로그 전송
         log_entry = self.format(record)
-        asyncio.create_task(self.send_log(log_entry))  # 비동기적으로 로그 전송
+        asyncio.create_task(self.send_log(log_entry))
 
 def setup_logging(log_file_path, server_url):
+    # 기본 로거 설정 (파일에 로깅)
     logging.basicConfig(filename=log_file_path, filemode='w', level=logging.INFO)
     logger = logging.getLogger()
 
+    # 비동기 서버 핸들러 추가
     log_server_handler = LogServerHandler(server_url, log_file_path.split('/')[-1])
     log_server_handler.setLevel(logging.INFO)
     logger.addHandler(log_server_handler)
