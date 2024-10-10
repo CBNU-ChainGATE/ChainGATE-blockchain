@@ -413,8 +413,7 @@ def search_chain():
     """Search data from blockchain."""
     logging.info("=== Start block search ===")
     data = request.get_json()
-    results = blockchain.search_block(
-        data['date'], data['employee_id'], data['name'], data['department'])
+    results = blockchain.search_block(data['date'], data['employee_id'], data['name'], data['department'])
     if not results:
         logging.info("No matching records found!")
         logging.info("=== block search complete ===")
