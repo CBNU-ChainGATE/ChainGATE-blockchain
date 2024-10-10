@@ -60,7 +60,7 @@ class MySQLManager:
 
     def insert_entrance_log(self, previous_hash, timestamp, date, department, name, position, time):
         insert_query = """
-        INSERT INTO entrance_log (previous_hash, timestamp, date, department, name, position, time)
+        INSERT INTO entrance_log (previous_hash, timestamp, date, time, employee_id, name, position, department)
         VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
         self.execute_query(insert_query, (previous_hash,

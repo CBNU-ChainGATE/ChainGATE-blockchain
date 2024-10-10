@@ -54,10 +54,11 @@ mysql> CREATE TABLE entrance_log (
     previous_hash CHAR(64) NOT NULL,
     timestamp DOUBLE NOT NULL,
     date DATE NOT NULL,
-    department VARCHAR(100) NOT NULL,
+    time TIME NOT NULL,
+    employee_id VARCHAR(20) NOT NULL,
     name VARCHAR(100) NOT NULL,
     position VARCHAR(100) NOT NULL,
-    time TIME NOT NULL
+    department VARCHAR(100) NOT NULL
 );
 mysql> CREATE USER '{username}'@'localhost' IDENTIFIED BY 'password';
 mysql> GRANT SELECT, INSERT ON chaingate.entrance_log TO '{username}'@'localhost';
@@ -143,6 +144,7 @@ _❗모든 노드에 동시에 보내져야 됨_
     {
         "date": "2024-04-12",
         "time": "10:30:00",
+        "employee_id": "2019038999"
         "name": "홍길동",
         "position": "팀원",
         "department": "개발부"
@@ -152,6 +154,7 @@ _❗모든 노드에 동시에 보내져야 됨_
 | :----------: | :---------: | :-----------------: |
 |    "date"    |  출입날짜   | String [YYYY-MM-DD] |
 |    "time"    |  출입시간   |  String [HH:MM:SS]  |
+|    "employee_id"    | 사번 |       String        |
 |    "name"    | 출입자 이름 |       String        |
 |  "position"  | 출입자 직급 |       String        |
 | "department" | 출입자 소속 |       String        |
