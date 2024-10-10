@@ -39,9 +39,9 @@ class Blockchain:
                 "position": self.pending_transactions.get('position'),
                 "time": self.pending_transactions.get('time')
             }
-            self.pending_transactions = {}
-            db_manager.insert_entrance_log(block['previous_hash'], block['timestamp'], block['date'],
-                                           block['department'], block['name'], block['position'], block['time'])
+            self.pending_transactions = {} previous_hash, timestamp, date, time, employee_id, name, position, department
+            db_manager.insert_entrance_log(block['previous_hash'], block['timestamp'], block['date'], block['time']
+                                           block['employee_id'], block['name'], block['position'], block['department'])
 
             self.last_block = block
             return True

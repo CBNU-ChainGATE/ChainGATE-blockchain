@@ -58,22 +58,25 @@ class MySQLManager:
         else:
             return 0
 
-    def insert_entrance_log(self, previous_hash, timestamp, date, department, name, position, time):
+    def insert_entrance_log(self, previous_hash, timestamp, date, time, employee_id, name, position, department):
         insert_query = """
         INSERT INTO entrance_log (previous_hash, timestamp, date, time, employee_id, name, position, department)
         VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
-        self.execute_query(insert_query, (previous_hash,
-                           timestamp, date, department, name, position, time))
+        self.execute_query(insert_query, (previous_hash, timestamp,
+                           date, time, employee_id, name, position, department))
 
-    def search_data(self, date=None, name=None, department=None):
-        query = "SELECT date, time, name, department, position FROM entrance_log"
+    def search_data(self, date=None, employee_id=None, name=None, department=None):
+        query = "SELECT date, time, employee_id, name, department, position FROM entrance_log"
         conditions = []
         params = []
 
         if date:
             conditions.append("date = %s")
             params.append(date)
+        if employee_id:
+            conditions.append("employee_id = %s")
+            params.append(employee_id)
         if name:
             conditions.append("name = %s")
             params.append(name)
