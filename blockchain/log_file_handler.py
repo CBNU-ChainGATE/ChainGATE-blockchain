@@ -1,8 +1,8 @@
 # log_file_handler.py
-from watchdog.events import FileSystemEventHandler
-import requests
-from config import LOGFILE, LOG_UPLOAD_URL
-import os  # os 모듈을 추가합니다.
+# from watchdog.events import FileSystemEventHandler
+# import requests
+# from config import LOGFILE, LOG_UPLOAD_URL
+# import os  # os 모듈을 추가합니다.
 
 
 # class LogFileHandler(FileSystemEventHandler):
@@ -20,7 +20,9 @@ import os  # os 모듈을 추가합니다.
 #                     print("로그 파일 전송 실패:", response.text)
 
 
-# 커스텀 핸들러 정의
+import logging
+import requests
+
 class LogServerHandler(logging.Handler):
     def __init__(self, server_url, log_file_name):
         super().__init__()
@@ -39,3 +41,14 @@ class LogServerHandler(logging.Handler):
                 print(f"Failed to send log entry. Status code: {response.status_code}")
         except Exception as e:
             print(f"Error while sending log entry: {e}")
+
+def setup_logging(log_file_path, server_url):
+    logging.basicConfig(filename=log_file_path, filemode='w', level=logging.INFO)
+    logger = logging.getLogger()
+
+    # 로그 서버로 로그를 보내는 핸들러 추가 (파일 이름 포함)
+    log_server_handler = LogServerHandler(server_url, log_file_path.split('/')[-1])
+    log_server_handler.setLevel(logging.INFO)
+    logger.addHandler(log_server_handler)
+
+    return logger

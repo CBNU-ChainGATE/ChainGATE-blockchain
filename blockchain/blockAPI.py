@@ -7,13 +7,14 @@ from blockchain import Blockchain
 from cert import Cert
 from config import PORT, LOGFILE
 import logging
-from watchdog.observers import Observer
-from log_file_handler import LogFileHandler  # 새로 생성한 모듈 임포트
-
+from log_file_handler import setup_logging  # 로그 핸들러 모듈 임포트
 
 app = Flask(__name__)
 # logging.basicConfig(filename=LOGFILE, filemode='w', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logging.basicConfig(filename=LOGFILE, filemode='w', level=logging.INFO)
+# logging.basicConfig(filename=LOGFILE, filemode='w', level=logging.INFO)
+
+# 로그 설정
+logger = setup_logging(LOGFILE, LOG_UPLOAD_URL)
 
 # 로컬 IP 가져오기
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -431,16 +432,19 @@ def full_chain():
 
 
 if __name__ == "__main__":
-    logging.info(f"Starting server on port {PORT}")
+    logger.info(f"Starting server on port {PORT}")
+    app.run(host='0.0.0.0', port=PORT)
 
-    # 로그 파일 변경 감지
-    event_handler = LogFileHandler()
-    observer = Observer()
-    observer.schedule(event_handler, path='logs/', recursive=False)
-    observer.start()  # Observer를 시작합니다.
+    # logging.info(f"Starting server on port {PORT}")
 
-    try:
-        app.run(host='0.0.0.0', port=PORT)  # Flask 서버를 시작합니다.
-    except KeyboardInterrupt:
-        observer.stop()  # 키보드 인터럽트 시 Observer를 정지합니다.
-    observer.join()
+    # # 로그 파일 변경 감지
+    # event_handler = LogFileHandler()
+    # observer = Observer()
+    # observer.schedule(event_handler, path='logs/', recursive=False)
+    # observer.start()  # Observer를 시작합니다.
+
+    # try:
+    #     app.run(host='0.0.0.0', port=PORT)  # Flask 서버를 시작합니다.
+    # except KeyboardInterrupt:
+    #     observer.stop()  # 키보드 인터럽트 시 Observer를 정지합니다.
+    # observer.join()
