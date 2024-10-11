@@ -10,8 +10,6 @@ import logging
 from log_file_handler import setup_logging  # 로그 핸들러 모듈 임포트
 
 app = Flask(__name__)
-# logging.basicConfig(filename=LOGFILE, filemode='w', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-# logging.basicConfig(filename=LOGFILE, filemode='w', level=logging.INFO)
 
 # 로그 설정
 logger = setup_logging(LOGFILE, LOG_UPLOAD_URL)
@@ -413,7 +411,8 @@ def search_chain():
     """Search data from blockchain."""
     logging.info("=== Start block search ===")
     data = request.get_json()
-    results = blockchain.search_block(data['date'], data['employee_id'], data['name'], data['department'])
+    results = blockchain.search_block(
+        data['date'], data['employee_id'], data['name'], data['department'])
     if not results:
         logging.info("No matching records found!")
         logging.info("=== block search complete ===")
@@ -434,17 +433,3 @@ def full_chain():
 if __name__ == "__main__":
     logger.info(f"Starting server on port {PORT}")
     app.run(host='0.0.0.0', port=PORT)
-
-    # logging.info(f"Starting server on port {PORT}")
-
-    # # 로그 파일 변경 감지
-    # event_handler = LogFileHandler()
-    # observer = Observer()
-    # observer.schedule(event_handler, path='logs/', recursive=False)
-    # observer.start()  # Observer를 시작합니다.
-
-    # try:
-    #     app.run(host='0.0.0.0', port=PORT)  # Flask 서버를 시작합니다.
-    # except KeyboardInterrupt:
-    #     observer.stop()  # 키보드 인터럽트 시 Observer를 정지합니다.
-    # observer.join()
