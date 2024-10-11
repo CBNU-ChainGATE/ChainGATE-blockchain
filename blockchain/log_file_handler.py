@@ -28,8 +28,7 @@ class LogServerHandler(logging.Handler):
                     'file_name': self.log_file_name
                 })
                 if response.status_code != 200:
-                    print(f"Failed to send log entry. Status code: {
-                          response.status_code}")
+                    print(f"Failed to send log entry. Status code: {response.status_code}")
             except Exception as e:
                 print(f"Error while sending log entry: {e}")
 
@@ -39,12 +38,10 @@ class LogServerHandler(logging.Handler):
 
 
 def setup_logging(log_file_path, server_url):
-    logging.basicConfig(filename=log_file_path,
-                        filemode='w', level=logging.INFO)
+    logging.basicConfig(filename=log_file_path, filemode='w', level=logging.INFO)
     logger = logging.getLogger()
 
-    log_server_handler = LogServerHandler(
-        server_url, log_file_path.split('/')[-1])
+    log_server_handler = LogServerHandler(server_url, log_file_path.split('/')[-1])
     log_server_handler.setLevel(logging.INFO)
 
     formatter = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
