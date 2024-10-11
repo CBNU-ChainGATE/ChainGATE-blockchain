@@ -162,14 +162,16 @@ _❗모든 노드에 동시에 보내져야 됨_
 ### 3. chain/search [POST]
 
     {
-        "date": "2024-04-12",
-        "name": "",
-        "department": "개발부"
+        "date": "2024-10-11",
+        "employee_id": "",
+        "department": "",
+        "name": "김동규"
     }
 
 |     Key      |    Value    |           Type            |
 | :----------: | :---------: | :-----------------------: |
 |    "date"    |  출입날짜   | String [YYYY-MM-DD] OR "" |
+|    "employee_id"    | 사번 |       String OR ""        |
 |    "name"    | 출입자 이름 |       String OR ""        |
 | "department" | 출입자 소속 |       String OR ""        |
 
