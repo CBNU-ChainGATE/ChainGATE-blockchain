@@ -44,7 +44,7 @@ def setup_logging(log_file_path, server_url):
     log_server_handler = LogServerHandler(server_url, log_file_path.split('/')[-1])
     log_server_handler.setLevel(logging.INFO)
 
-    formatter = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
+    formatter = logging.Formatter('%(levelname)s:%(message)s')
     log_server_handler.setFormatter(formatter)
     logger.addHandler(log_server_handler)
 
