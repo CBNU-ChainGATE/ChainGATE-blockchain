@@ -2,3 +2,4 @@ blockchain/config.py
 blockchain/register.py
 blockchain/logs/
 blockchain/__pycache__/
+blockchain/clean_mysql.py
