@@ -5,7 +5,7 @@ import socket
 import time
 from blockchain import Blockchain
 from cert import Cert
-from config import PORT, LOGFILE, LOG_UPLOAD_URL
+from config import PORT, LOGFILE, LOG_UPLOAD_URL, NODE_IP_TO_NAME_LIST
 import logging
 from log_file_handler import setup_logging  # 로그 핸들러 모듈 임포트
 
@@ -71,7 +71,7 @@ def changing_primary():
     primary_N = (primary_N + 1) % len(blockchain.nodes)
     primary = sorted(blockchain.nodes)[primary_N]
     pbft_protocol_condition = False
-    logging.info(f'Changed Primary Node is "{primary}"')
+    logging.info(f'Changed Primary Node is "{NODE_IP_TO_NAME_LIST[primary]}"')
 
 
 def notify_primary_change():
@@ -92,7 +92,7 @@ def primary_change_protocol():
     if consensus_nums > 3:  # Maximum allowed consensus attempts
         consensus_nums = 0
         logging.error(
-            "[ERROR] The maximum number of requests has been exceeded!")
+            "The maximum number of requests has been exceeded!")
     else:
         consensus_nums += 1
         send(primary, {'type': 'REQUEST', 'data': request_data})
@@ -164,7 +164,6 @@ def handle_request():
         message = request.get_json()
         blockchain.len = blockchain.get_block_total()
         if node_id == primary:
-            logging.info("(Request) Start the Request step")
             # print('Debugging: Pass the IF in Request')  # Debugging
             start_time = time.time()  # 제한 시간 재설정
             N = blockchain.len + 1
@@ -186,15 +185,18 @@ def handle_request():
                 }))
                 threads.append(preprepare_thread)
                 preprepare_thread.start()
+                logging.info(
+                    f"(Request) Pre-prepare message is sent to {NODE_IP_TO_NAME_LIST[node]}.")
         else:
-            logging.info(f'(Request) \u001b[34mThis is not Primary node!\u001b[0m')
-            return jsonify({'message': '(Request) This is not Primary node!'}), 403
+            logging.info(
+                f'(Request) \u001b[36mThis is not Primary node!\u001b[0m')
+            return jsonify({'message': '(Request) This is not Primary node!'}), 200
     except Exception as e:
+        logging.error(f'(Request) {str(e)}')
         primary_change_protocol()
-        logging.error(f'(Request) [ERROR] {str(e)}')
         return jsonify({'error': str(e)}), 500
-    logging.info('(Request) The Request step is complete.')
-    return jsonify({'message': '(Request) The Request step is complete.'}), 200
+    logging.info('(Request) Complete.')
+    return jsonify({'message': '(Request) Complete.'}), 200
 
 
 @app.route('/consensus/preprepare', methods=['POST'])
@@ -207,8 +209,7 @@ def handle_preprepare():  # Primary 노드는 해당 함수 실행 안함
     try:
         # pre-prepare 메세지에 대한 검증
         if validate_preprepare(message):
-            logging.info("(Pre-prepare) Start the Pre-prepare step")
-            # print('Debugging: Pass the IF in preprepare!!')  # Debugging
+            logging.info("(Pre-prepare) Message is a valid.")
             log.append(message)  # pre-prepare 메세지 수집
             # for문을 비동기로 처리
             threads = []
@@ -224,18 +225,20 @@ def handle_preprepare():  # Primary 노드는 해당 함수 실행 안함
                 }))
                 threads.append(prepare_thread)
                 prepare_thread.start()
+                logging.info(
+                    f"(Pre-prepare) Prepare message is sent to {NODE_IP_TO_NAME_LIST[node]}.")
             consensus_done[1] += 1
         else:
             consensus_done[1] += 1
             logging.error(
-                '(Pre-prepare) [ERROR] The PRE-PREPARE message is invalid!')
+                '(Pre-prepare) The PRE-PREPARE message is invalid!')
             return jsonify({'message': '(Pre-prepare) The PRE-PREPARE message is invalid!'}), 400
     except Exception as e:
+        logging.error(f'(Pre-prepare) {str(e)}')
         primary_change_protocol()
-        logging.error(f'(Pre-prepare) [ERROR] {str(e)}')
         return jsonify({'error': str(e)}), 500
-    logging.info('(Pre-prepare) The Pre-prepare step is complete.')
-    return jsonify({'message': '(Pre-prepare) The Pre-prepare step is complete.'}), 200
+    logging.info('(Pre-prepare) Complete.')
+    return jsonify({'message': '(Pre-prepare) Complete.'}), 200
 
 
 @app.route('/consensus/prepare', methods=['POST'])
@@ -243,7 +246,7 @@ def handle_prepare():
     """Prepare Step."""
     global prepare_certificate, log, consensus_done, get_pre_msg
     if stop_pbft:
-        return jsonify({'error': 'PBFT protocol stopped due to primary change!'}), 500
+        return jsonify({'message': 'PBFT protocol stopped due to primary change!'}), 202
     message = request.get_json()
     while consensus_done[1] != 1 and node_id != primary:
         pass
@@ -251,11 +254,11 @@ def handle_prepare():
         log.append(message)         # prepare 메세지 수집
         if wait_for_messages('prepare'):  # 모든 노드한테서 메세지를 받을 때까지 기다리기
             consensus_done[2] += 1
-            return jsonify({'message': '(Prepare) Wait the message!'}), 404
-        logging.info("(Prepare) Start the Prepare step")
+            return jsonify({'message': '(Prepare) Wait the message!'}), 202
         prepare_msg_list = [m for m in log if m['type'] == 'PREPARE' and m['view']
                             == message['view'] and m['seq'] == message['seq']]
         if len(prepare_msg_list) > 2/3 * (node_len-1):
+            logging.info("(Prepare) Valid message verification completed.")
             prepare_certificate = True   # "prepared the request" 상태로 변환
             # for문을 비동기로 처리
             threads = []
@@ -270,17 +273,20 @@ def handle_prepare():
                 }))
                 threads.append(commit_thread)
                 commit_thread.start()
+                logging.info(f"(Prepare) Commit message is sent to {
+                             NODE_IP_TO_NAME_LIST[node]}.")
             consensus_done[2] += 1
         else:
             consensus_done[2] += 1
-            logging.error('(Prepare) [ERROR] The Prepare step is failed!')
-            return jsonify({'message': '(Prepare) The Prepare step is failed!'}), 400
+            logging.error(
+                '(Prepare) There are not enough valid messages collected!')
+            return jsonify({'message': '(Prepare) There are not enough valid messages collected!'}), 400
     except Exception as e:
+        logging.error(f'(Prepare) {str(e)}')
         primary_change_protocol()
-        logging.error(f'(Prepare) [ERROR] {str(e)}')
         return jsonify({'error': str(e)}), 500
-    logging.info("(Prepare) The Prepare step is complete.")
-    return jsonify({'message': '(Prepare) The Prepare step is complete.'}), 200
+    logging.info("(Prepare) Complete.")
+    return jsonify({'message': '(Prepare) Complete.'}), 200
 
 
 @app.route('/consensus/commit', methods=['POST'])
@@ -288,18 +294,18 @@ def handle_commit():
     """Commit Step."""
     global request_data, log, commit_certificate, consensus_done, prepare_certificate, commit_certificate
     if stop_pbft:
-        return jsonify({'error': 'PBFT protocol stopped due to primary change!'}), 500
+        return jsonify({'error': 'PBFT protocol stopped due to primary change!'}), 202
     while consensus_done[2] < node_len-1:
         pass
     try:
         message = request.get_json()
         log.append(message)         # commit 메세지 수집
         if wait_for_messages('commit'):  # 모든 노드한테서 메세지를 받을 때까지 기다리기
-            return jsonify({'message': '(Commit) Wait the message!'}), 404
-        logging.info("(Commit) Start the Commit step")
+            return jsonify({'message': '(Commit) Wait the message!'}), 202
         commit_msg_list = [m for m in log if m['type'] == 'COMMIT' and m['view']
                            == message['view'] and m['seq'] == message['seq']]
         if len(commit_msg_list) > 2/3 * node_len:
+            logging.info("(Commit) Valid message verification completed.")
             commit_certificate = True   # "commit certificate" 상태로 변환
 
         # Prepare Certificate & Commit Certificate 상태가 되었다면 블록 추가 시행
@@ -307,13 +313,13 @@ def handle_commit():
             prepare_certificate = False
             commit_certificate = False
             if reply_request():
-                logging.info("(Commit) The Commit step is complete.")
-                return jsonify({'message': '(Commit) The Commit step is complete.'}), 200
+                logging.info("(Commit) Complete.")
+                return jsonify({'message': '(Commit) Complete.'}), 200
     except Exception as e:
+        logging.error(f'(Commit) {str(e)}')
         primary_change_protocol()
-        logging.error(f'(Commit) [ERROR] {str(e)}')
         return jsonify({'error': str(e)}), 500
-    logging.error("(Commit) [ERROR] The Commit step is failed!")
+    logging.error("(Commit) The Commit step is failed!")
     return jsonify({'message': '(Commit) The commit step is failed!'}), 400
 
 
@@ -325,7 +331,6 @@ def reply_request():
     pbft_protocol_condition = False  # PBFT 프로토콜이 끝났음을 알림
 
     if blockchain.create_block(blockchain.hash(last_block)):
-        # logging.info(f"** Node [{node_id}] added a new block **")
         logging.info(
             f"[SUCCESS] Block has been successfully added to the chain!")
         return True
@@ -356,7 +361,7 @@ def new_transaction():
     pbft_protocol_condition = True  # PBFT 프로토콜이 수행 중임을 알림
     send(node_id, client_request)
     logging.info('(New) Request sent to all nodes')
-    return jsonify({'message': '(New) Request sent to all nodes'}), 201
+    return jsonify({'message': '(New) Request sent to all nodes'}), 200
 
 ########################################################################
 ### PBFT Protocol (End)                                              ###
@@ -371,22 +376,23 @@ def register_nodes():
     logging.info("Registering the Node ...")
     cert_pem = request.json.get('cert')
     if not cert_pem:
-        logging.error("[ERROR] No certificate data provided!")
+        logging.error("No certificate data provided!")
         return jsonify({'message': 'No certificate data provided!'}), 400
 
     if cert.verify_cert(cert_pem):
         node = request.remote_addr
         blockchain.add_node(node)
     else:
-        logging.error("[ERROR] Invalid or disallowed certificate!")
+        logging.error("Invalid or disallowed certificate!")
         return jsonify({'message': 'Invalid or disallowed certificate!'}), 400
 
     node_len = len(blockchain.nodes) - 1
 
     nodes = sorted(blockchain.nodes)
     primary = nodes[primary_N]
-    logging.info(f"Nodes: {blockchain.nodes}")  # debugging
-    logging.info(f"Primary node: {primary}")  # debugging
+    # debugging
+    logging.info(f"Nodes: {NODE_IP_TO_NAME_LIST[blockchain.nodes]}")
+    logging.info(f"Primary node: {NODE_IP_TO_NAME_LIST[primary]}")  # debugging
     logging.info("Certificate received successfully.")
     return jsonify({'message': 'Certificate received successfully.'}), 200
 
@@ -407,7 +413,7 @@ def handel_primary_change():
         stop_pbft = False
         logging.info("=== Primary change API complete ===")
         return jsonify({'message': 'View changed successfully.'}), 200
-    return jsonify({'message': '[ERROR] Wrong Message!'}), 400
+    return jsonify({'message': 'Wrong Message!'}), 400
 
 
 @app.route('/chain/search', methods=['POST'])
