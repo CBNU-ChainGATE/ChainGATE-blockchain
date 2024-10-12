@@ -187,7 +187,8 @@ def handle_request():
                 threads.append(preprepare_thread)
                 preprepare_thread.start()
         else:
-            return jsonify({'message': '(Request) This is not Primary node!'}), 400
+            logging.info(f'(Request) \u001b[34mThis is not Primary node!\u001b[0m')
+            return jsonify({'message': '(Request) This is not Primary node!'}), 403
     except Exception as e:
         primary_change_protocol()
         logging.error(f'(Request) [ERROR] {str(e)}')
