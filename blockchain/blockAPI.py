@@ -323,7 +323,8 @@ def reply_request():
     pbft_protocol_condition = False  # PBFT 프로토콜이 끝났음을 알림
 
     if blockchain.create_block(blockchain.hash(last_block)):
-        logging.info(f"** Node [{node_id}] added a new block **")
+        # logging.info(f"** Node [{node_id}] added a new block **")
+        logging.info(f"[SUCCESS] Block has been successfully added to the chain!")
         return True
     return False
 
