@@ -92,7 +92,7 @@ def primary_change_protocol():
     if consensus_nums > 3:  # Maximum allowed consensus attempts
         consensus_nums = 0
         logging.error(
-            "Error: The maximum number of requests has been exceeded!")
+            "[Error] The maximum number of requests has been exceeded!")
     else:
         consensus_nums += 1
         send(primary, {'type': 'REQUEST', 'data': request_data})
@@ -190,7 +190,7 @@ def handle_request():
             return jsonify({'message': '(Request) This is not Primary node!'}), 400
     except Exception as e:
         primary_change_protocol()
-        logging.error(f'(Request) {str(e)}')
+        logging.error(f'(Request) [Error] {str(e)}')
         return jsonify({'error': str(e)}), 500
     logging.info('(Request) The Request step is complete.')
     return jsonify({'message': '(Request) The Request step is complete.'}), 200
@@ -226,11 +226,12 @@ def handle_preprepare():  # Primary 노드는 해당 함수 실행 안함
             consensus_done[1] += 1
         else:
             consensus_done[1] += 1
-            logging.error('(Pre-prepare) The PRE-PREPARE message is invalid!')
+            logging.error(
+                '(Pre-prepare) [Error] The PRE-PREPARE message is invalid!')
             return jsonify({'message': '(Pre-prepare) The PRE-PREPARE message is invalid!'}), 400
     except Exception as e:
         primary_change_protocol()
-        logging.error(f'(Pre-prepare) {str(e)}')
+        logging.error(f'(Pre-prepare) [Error] {str(e)}')
         return jsonify({'error': str(e)}), 500
     logging.info('(Pre-prepare) The Pre-prepare step is complete.')
     return jsonify({'message': '(Pre-prepare) The Pre-prepare step is complete.'}), 200
@@ -271,11 +272,11 @@ def handle_prepare():
             consensus_done[2] += 1
         else:
             consensus_done[2] += 1
-            logging.error('(Prepare) The Prepare step is failed!')
+            logging.error('(Prepare) [Error] The Prepare step is failed!')
             return jsonify({'message': '(Prepare) The Prepare step is failed!'}), 400
     except Exception as e:
         primary_change_protocol()
-        logging.error(f'(Prepare) {str(e)}')
+        logging.error(f'(Prepare) [Error] {str(e)}')
         return jsonify({'error': str(e)}), 500
     logging.info("(Prepare) The Prepare step is complete.")
     return jsonify({'message': '(Prepare) The Prepare step is complete.'}), 200
@@ -309,9 +310,9 @@ def handle_commit():
                 return jsonify({'message': '(Commit) The Commit step is complete.'}), 200
     except Exception as e:
         primary_change_protocol()
-        logging.error(f'(Commit) {str(e)}')
+        logging.error(f'(Commit) [Error] {str(e)}')
         return jsonify({'error': str(e)}), 500
-    logging.error("(Commit) The Commit step is failed!")
+    logging.error("(Commit) [Error] The Commit step is failed!")
     return jsonify({'message': '(Commit) The commit step is failed!'}), 400
 
 
@@ -324,7 +325,8 @@ def reply_request():
 
     if blockchain.create_block(blockchain.hash(last_block)):
         # logging.info(f"** Node [{node_id}] added a new block **")
-        logging.info(f"[SUCCESS] Block has been successfully added to the chain!")
+        logging.info(
+            f"[SUCCESS] Block has been successfully added to the chain!")
         return True
     return False
 
@@ -368,14 +370,14 @@ def register_nodes():
     logging.info("Registering the Node ...")
     cert_pem = request.json.get('cert')
     if not cert_pem:
-        logging.error("No certificate data provided!")
+        logging.error("[Error] No certificate data provided!")
         return jsonify({'message': 'No certificate data provided!'}), 400
 
     if cert.verify_cert(cert_pem):
         node = request.remote_addr
         blockchain.add_node(node)
     else:
-        logging.error("Invalid or disallowed certificate!")
+        logging.error("[Error] Invalid or disallowed certificate!")
         return jsonify({'message': 'Invalid or disallowed certificate!'}), 400
 
     node_len = len(blockchain.nodes) - 1
@@ -412,7 +414,8 @@ def search_chain():
     """Search data from blockchain."""
     logging.info("=== Start block search ===")
     data = request.get_json()
-    results = blockchain.search_block(data['date'], data['employee_id'], data['name'], data['department'])
+    results = blockchain.search_block(
+        data['date'], data['employee_id'], data['name'], data['department'])
     if not results:
         logging.info("No matching records found!")
         logging.info("=== block search complete ===")
