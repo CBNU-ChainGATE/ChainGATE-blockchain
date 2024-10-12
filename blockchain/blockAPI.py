@@ -273,8 +273,7 @@ def handle_prepare():
                 }))
                 threads.append(commit_thread)
                 commit_thread.start()
-                logging.info(f"(Prepare) Commit message is sent to {
-                             NODE_IP_TO_NAME_LIST[node]}.")
+                logging.info(f"(Prepare) Commit message is sent to {NODE_IP_TO_NAME_LIST[node]}.")
             consensus_done[2] += 1
         else:
             consensus_done[2] += 1
