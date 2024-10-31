@@ -273,7 +273,8 @@ def handle_prepare():
                 }))
                 threads.append(commit_thread)
                 commit_thread.start()
-                logging.info(f"(Prepare) Commit message is sent to {NODE_IP_TO_NAME_LIST[node]}.")
+                logging.info(f"(Prepare) Commit message is sent to {
+                             NODE_IP_TO_NAME_LIST[node]}.")
             consensus_done[2] += 1
         else:
             consensus_done[2] += 1
@@ -424,7 +425,7 @@ def search_chain():
     if not results:
         logging.info("No matching records found!")
         logging.info("=== block search complete ===")
-        return jsonify({'results': 'No matching records found!'}), 404
+        return jsonify({'results': 'No matching records found!'}), 200
     logging.info("Found the block")
     logging.info("=== block search complete ===")
     return jsonify({'results': results}), 200
