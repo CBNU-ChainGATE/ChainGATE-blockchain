@@ -424,7 +424,7 @@ def search_chain():
     if not results:
         logging.info("No matching records found!")
         logging.info("=== block search complete ===")
-        return jsonify({'results': 'No matching records found!'}), 200
+        return jsonify({'results': 'No matching records found!'}), 404
     logging.info("Found the block")
     logging.info("=== block search complete ===")
     return jsonify({'results': results}), 200
