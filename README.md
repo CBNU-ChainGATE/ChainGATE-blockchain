@@ -1,12 +1,14 @@
-# ChainGATE
+# ChainGATE - blockchain
 
-블록체인을 이용한 출입관리시스템\_충북대학교 졸업작품
+## Description
 
-# version
+허가형 블록체인을 위한 PBFT 프로토콜
+
+## version
 
 2024.07.09 - version 1.0.0
 
-# Setting
+## Setting
 
 ❗**최소 3개 이상의 우분투 서버가 필요함**
 
